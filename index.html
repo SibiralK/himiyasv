@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Химическая связь — образовательная игра</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg-deep: #0a0820;
+    --bg-mid: #1a0f3e;
+    --bg-light: #2d1b5e;
+    --ionic: #ff6b9d;
+    --cov-np: #4ecdc4;
+    --cov-p: #ffd93d;
+    --metal: #e0e0e0;
+    --accent: #a78bfa;
+    --text: #f0eaff;
+    --text-dim: #b8a8d8;
+    --success: #4ade80;
+    --error: #f87171;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+    position: relative;
+  }
+  
+  /* === SHINY BACKGROUND === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 600px 400px at 15% 20%, rgba(167, 139, 250, 0.35), transparent),
+      radial-gradient(ellipse 500px 350px at 85% 15%, rgba(255, 107, 157, 0.25), transparent),
+      radial-gradient(ellipse 700px 500px at 75% 80%, rgba(78, 205, 196, 0.28), transparent),
+      radial-gradient(ellipse 500px 400px at 20% 85%, rgba(255, 217, 61, 0.22), transparent),
+      radial-gradient(ellipse 400px 300px at 50% 50%, rgba(139, 92, 246, 0.2), transparent),
+      linear-gradient(135deg, #0a0820 0%, #1a0f3e 50%, #0a0820 100%);
+    z-index: -3;
+    animation: bgShift 20s ease-in-out infinite;
+  }
+  
+  @keyframes bgShift {
+    0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+    50% { filter: hue-rotate(15deg) brightness(1.1); }
+  }
+  
+  /* Animated shine streaks */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.04) 50%, transparent 60%),
+      linear-gradient(65deg, transparent 30%, rgba(167,139,250,0.06) 50%, transparent 70%);
+    background-size: 200% 200%;
+    z-index: -2;
+    animation: shineStreak 12s linear infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes shineStreak {
+    0% { background-position: 0% 0%, 100% 100%; }
+    100% { background-position: 200% 200%, -100% -100%; }
+  }
+  
+  .sparkle-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  
+  .sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 
+      0 0 6px 1px rgba(255,255,255,0.9),
+      0 0 12px 2px rgba(167,139,250,0.6);
+    animation: sparkleTwinkle var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+  
+  .sparkle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    transform: translate(-50%, -50%);
+    opacity: 0.7;
+  }
+  
+  .sparkle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(0deg, transparent, #fff, transparent);
+    transform: translate(-50%, -50%);
+    opacity: 0.7;
+  }
+  
+  @keyframes sparkleTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(45deg); }
+  }
+  
+  /* Floating glowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.5;
+    z-index: -2;
+    pointer-events: none;
+    animation: orbFloat 15s ease-in-out infinite;
+  }
+  
+  .orb-1 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(167,139,250,0.6), transparent 70%);
+    top: 10%; left: 5%;
+    animation-delay: 0s;
+  }
+  .orb-2 {
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(255,107,157,0.5), transparent 70%);
+    top: 60%; right: 5%;
+    animation-delay: -5s;
+  }
+  .orb-3 {
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(78,205,196,0.5), transparent 70%);
+    bottom: 5%; left: 30%;
+    animation-delay: -10s;
+  }
+  
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.1); }
+    66% { transform: translate(-20px, 30px) scale(0.95); }
+  }
+  
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    animation: fadeIn 0.5s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .screen.active { display: block; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* === START SCREEN === */
+  .start-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .start-screen.active { display: flex; }
+  
+  .title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ffd93d 30%, #4ecdc4 60%, #a78bfa 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+    animation: titleShine 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(167,139,250,0.4));
+  }
+  
+  @keyframes titleShine {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--text-dim);
+    margin-bottom: 30px;
+    max-width: 600px;
+  }
+  
+  .hero-atoms {
+    width: min(500px, 90vw);
+    height: 300px;
+    margin: 20px 0 30px;
+    filter: drop-shadow(0 0 30px rgba(167,139,250,0.4));
+  }
+  
+  .instructions {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 16px;
+    padding: 20px 25px;
+    max-width: 600px;
+    margin-bottom: 30px;
+    text-align: left;
+    backdrop-filter: blur(10px);
+    box-shadow: 
+      0 8px 32px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  
+  .instructions h3 {
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  
+  .instructions ul {
+    list-style: none;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  
+  .instructions li::before {
+    content: "◆ ";
+    color: var(--cov-np);
+  }
+  
+  .btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 
+      0 4px 20px rgba(139,92,246,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  
+  .btn:hover::before { left: 100%; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(139,92,246,0.7); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .btn-secondary {
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(10px);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.18); }
+  
+  /* === GAME HEADER === */
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border-radius: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  
+  .level-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .level-badge {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 10px rgba(139,92,246,0.4);
+  }
+  
+  .progress-bar {
+    flex: 1;
+    min-width: 150px;
+    max-width: 400px;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cov-np), var(--cov-p), var(--ionic));
+    background-size: 200% 100%;
+    transition: width 0.4s ease;
+    border-radius: 10px;
+    animation: progressShine 3s linear infinite;
+    box-shadow: 0 0 10px rgba(78,205,196,0.5);
+  }
+  
+  @keyframes progressShine {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  
+  .score-display {
+    display: flex;
+    gap: 15px;
+    font-size: 0.95rem;
+  }
+  
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .score-item.correct { color: var(--success); }
+  .score-item.wrong { color: var(--error); }
+  
+  /* === LEVEL 1: CLASSIFICATION === */
+  .level-title {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .level-title h2 {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    margin-bottom: 5px;
+  }
+  .level-title p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+  
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .category {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 2px dashed rgba(255,255,255,0.25);
+    border-radius: 16px;
+    padding: 15px;
+    min-height: 140px;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+  
+  .category.drag-over {
+    border-color: var(--accent);
+    background: rgba(167,139,250,0.2);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(167,139,250,0.5);
+  }
+  
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .category-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .category-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  
+  .category[data-type="ionic"] .category-name { color: var(--ionic); }
+  .category[data-type="cov-np"] .category-name { color: var(--cov-np); }
+  .category[data-type="cov-p"] .category-name { color: var(--cov-p); }
+  .category[data-type="metal"] .category-name { color: var(--metal); }
+  
+  .category-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 50px;
+  }
+  
+  .molecules-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.15));
+    border-radius: 16px;
+    min-height: 100px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .molecule-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04));
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 10px;
+    cursor: grab;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 90px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .molecule-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 20px rgba(167,139,250,0.3);
+  }
+  
+  .molecule-card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+  
+  .molecule-card.correct {
+    border-color: var(--success);
+    background: rgba(74,222,128,0.18);
+    cursor: default;
+    box-shadow: 0 0 15px rgba(74,222,128,0.4);
+  }
+  
+  .molecule-card.wrong {
+    border-color: var(--error);
+    background: rgba(248,113,113,0.18);
+    animation: shake 0.4s;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  
+  .molecule-svg {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .molecule-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .feedback-toast {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, rgba(20,10,40,0.95), rgba(40,20,70,0.95));
+    border: 2px solid var(--accent);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: transform 0.3s;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .feedback-toast.show { transform: translateX(-50%) translateY(0); }
+  .feedback-toast.success { border-color: var(--success); box-shadow: 0 0 20px rgba(74,222,128,0.4); }
+  .feedback-toast.error { border-color: var(--error); box-shadow: 0 0 20px rgba(248,113,113,0.4); }
+  
+  /* === LEVEL 2: BUILDER === */
+  .builder-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  
+  @media (min-width: 900px) {
+    .builder-layout { grid-template-columns: 1fr 1fr; }
+  }
+  
+  .builder-panel {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .builder-panel h3 {
+    margin-bottom: 15px;
+    color: var(--accent);
+    font-size: 1.1rem;
+  }
+  
+  .atom-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .atom-btn {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .atom-btn:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(167,139,250,0.3); }
+  .atom-btn.selected { border-color: var(--cov-np); background: rgba(78,205,196,0.2); box-shadow: 0 0 20px rgba(78,205,196,0.4); }
+  .atom-btn.disabled { opacity: 0.3; cursor: not-allowed; }
+  
+  .atom-btn svg { width: 50px; height: 50px; }
+  .atom-btn .symbol { font-weight: 700; font-size: 0.9rem; }
+  .atom-btn .name { font-size: 0.7rem; color: var(--text-dim); }
+  
+  .bond-stage {
+    background: radial-gradient(ellipse at center, rgba(167,139,250,0.2), transparent 70%);
+    border-radius: 16px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .bond-stage svg { width: 100%; height: 300px; }
+  
+  .bond-result {
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .bond-type-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  
+  .bond-explanation {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .builder-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+  
+  /* === LEVEL 3: QUIZ === */
+  .quiz-container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  .quiz-question {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .quiz-question h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  
+  .quiz-question .q-visual {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  
+  .quiz-options {
+    display: grid;
+    gap: 10px;
+  }
+  
+  .quiz-option {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 1rem;
+    color: var(--text);
+    backdrop-filter: blur(10px);
+  }
+  
+  .quiz-option:hover:not(.disabled) {
+    border-color: var(--accent);
+    background: rgba(167,139,250,0.18);
+    box-shadow: 0 4px 15px rgba(167,139,250,0.3);
+  }
+  
+  .quiz-option.correct {
+    border-color: var(--success);
+    background: rgba(74,222,128,0.22);
+    box-shadow: 0 0 15px rgba(74,222,128,0.4);
+  }
+  
+  .quiz-option.wrong {
+    border-color: var(--error);
+    background: rgba(248,113,113,0.22);
+    box-shadow: 0 0 15px rgba(248,113,113,0.4);
+  }
+  
+  .quiz-option.disabled { cursor: default; }
+  
+  .quiz-explanation {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(167,139,250,0.12);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    display: none;
+  }
+  .quiz-explanation.show { display: block; }
+  
+  /* === FINAL SCREEN === */
+  .final-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .final-screen.active { display: flex; }
+  
+  .final-score {
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--cov-np), var(--cov-p), var(--ionic));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 20px 0;
+    animation: titleShine 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(167,139,250,0.5));
+  }
+  
+  .final-message {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    max-width: 500px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+  
+  .stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(167,139,250,0.6);
+  }
+  
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+  
+  .final-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  /* Animations for electrons */
+  @keyframes orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+  }
+  
+  @keyframes transferElectron {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(60px, -20px); }
+    100% { transform: translate(120px, 0); }
+  }
+  
+  .electron-moving {
+    animation: transferElectron 1.5s ease-in-out;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    .categories { grid-template-columns: 1fr 1fr; }
+    .molecule-svg { width: 55px; height: 55px; }
+    .molecule-card { min-width: 75px; padding: 8px; }
+    .game-header { font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sparkles layer -->
+<div class="sparkle-layer" id="sparkleLayer"></div>
+
+<!-- Floating glowing orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ===== START SCREEN ===== -->
+<div class="start-screen active" id="startScreen">
+  <h1 class="title">Химическая связь</h1>
+  <p class="subtitle">Погрузись в мир атомов и молекул — узнай, как они соединяются друг с другом</p>
+  
+  <svg class="hero-atoms" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="heroAtom1" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="#ff9ec7"/>
+        <stop offset="70%" stop-color="#ff6b9d"/>
+        <stop offset="100%" stop-color="#c44574"/>
+      </radialGradient>
+      <radialGradient id="heroAtom2" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="#7ee8dc"/>
+        <stop offset="70%" stop-color="#4ecdc4"/>
+        <stop offset="100%" stop-color="#2d8f87"/>
+      </radialGradient>
+      <radialGradient id="heroAtom3" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="#ffe88a"/>
+        <stop offset="70%" stop-color="#ffd93d"/>
+        <stop offset="100%" stop-color="#b89a1f"/>
+      </radialGradient>
+      <radialGradient id="heroBg" cx="50%" cy="50%">
+        <stop offset="0%" stop-color="#3d2a5f" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+    </defs>
+    
+    <!-- Background glow -->
+    <ellipse cx="250" cy="150" rx="220" ry="130" fill="url(#heroBg)"/>
+    
+    <!-- Orbital rings -->
+    <g opacity="0.3" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="3,4">
+      <ellipse cx="150" cy="150" rx="70" ry="25" transform="rotate(-20 150 150)"/>
+      <ellipse cx="250" cy="150" rx="80" ry="28" transform="rotate(10 250 150)"/>
+      <ellipse cx="360" cy="150" rx="65" ry="22" transform="rotate(-15 360 150)"/>
+    </g>
+    
+    <!-- Bond lines -->
+    <g stroke="#ffd93d" stroke-width="3" opacity="0.7" stroke-linecap="round">
+      <line x1="180" y1="150" x2="220" y2="150"/>
+      <line x1="180" y1="145" x2="220" y2="145"/>
+      <line x1="285" y1="150" x2="325" y2="150"/>
+    </g>
+    
+    <!-- Atom 1: Na-like (red/pink) -->
+    <g>
+      <circle cx="150" cy="150" r="45" fill="url(#heroAtom1)" stroke="#8a2e54" stroke-width="2"/>
+      <circle cx="135" cy="135" r="12" fill="#ffb8d4" opacity="0.6"/>
+      <text x="150" y="158" text-anchor="middle" font-size="26" font-weight="800" fill="#fff" font-family="Segoe UI">Na</text>
+      <!-- electrons -->
+      <circle cx="95" cy="145" r="4" fill="#fff"/>
+      <circle cx="205" cy="155" r="4" fill="#fff"/>
+      <circle cx="150" cy="100" r="4" fill="#fff"/>
+    </g>
+    
+    <!-- Atom 2: Cl-like (teal) -->
+    <g>
+      <circle cx="250" cy="150" r="50" fill="url(#heroAtom2)" stroke="#1f6b64" stroke-width="2"/>
+      <circle cx="232" cy="132" r="14" fill="#a8ebe4" opacity="0.6"/>
+      <text x="250" y="158" text-anchor="middle" font-size="28" font-weight="800" fill="#fff" font-family="Segoe UI">Cl</text>
+      <!-- electrons around -->
+      <circle cx="200" cy="145" r="4" fill="#fff"/>
+      <circle cx="300" cy="155" r="4" fill="#fff"/>
+      <circle cx="250" cy="95" r="4" fill="#fff"/>
+      <circle cx="250" cy="205" r="4" fill="#fff"/>
+    </g>
+    
+    <!-- Atom 3: H-like (yellow) -->
+    <g>
+      <circle cx="360" cy="150" r="32" fill="url(#heroAtom3)" stroke="#8a6f10" stroke-width="2"/>
+      <circle cx="348" cy="138" r="9" fill="#fff3b0" opacity="0.7"/>
+      <text x="360" y="157" text-anchor="middle" font-size="22" font-weight="800" fill="#4a3800" font-family="Segoe UI">H</text>
+      <circle cx="328" cy="150" r="3.5" fill="#fff"/>
+    </g>
+    
+    <!-- Decorative stars -->
+    <g fill="#fff" opacity="0.6">
+      <circle cx="50" cy="50" r="1.5"/>
+      <circle cx="450" cy="70" r="2"/>
+      <circle cx="80" cy="250" r="1.5"/>
+      <circle cx="430" cy="240" r="1.5"/>
+      <circle cx="250" cy="30" r="1"/>
+    </g>
+  </svg>
+  
+  <div class="instructions">
+    <h3>🎯 Что тебя ждёт</h3>
+    <ul>
+      <li><b>Уровень 1.</b> Распредели молекулы по типам химических связей</li>
+      <li><b>Уровень 2.</b> Собери связь сам — выбери атомы и посмотри, как они соединяются</li>
+      <li><b>Уровень 3.</b> Ответь на вопросы и закрепи знания</li>
+    </ul>
+  </div>
+  
+  <button class="btn" onclick="startGame()">Начать игру →</button>
+</div>
+
+<!-- ===== LEVEL 1: CLASSIFICATION ===== -->
+<div class="screen" id="level1Screen">
+  <div class="game-header">
+    <div class="level-indicator">
+      <span class="level-badge">Уровень 1 / 3</span>
+      <span style="color:var(--text-dim); font-size:0.9rem;">Классификация</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress1" style="width:0%"></div></div>
+    <div class="score-display">
+      <div class="score-item correct">✓ <span id="correct1">0</span></div>
+      <div class="score-item wrong">✗ <span id="wrong1">0</span></div>
+    </div>
+  </div>
+  
+  <div class="level-title">
+    <h2>Распредели вещества по типам связей</h2>
+    <p>Перетащи каждую молекулу в правильную категорию</p>
+  </div>
+  
+  <div class="categories" id="categories">
+    <div class="category" data-type="ionic">
+      <div class="category-header">
+        <svg class="category-icon" viewBox="0 0 36 36">
+          <circle cx="12" cy="18" r="9" fill="#ff6b9d" stroke="#8a2e54" stroke-width="1.5"/>
+          <text x="12" y="22" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">+</text>
+          <circle cx="26" cy="18" r="9" fill="#ff9ec7" stroke="#8a2e54" stroke-width="1.5"/>
+          <text x="26" y="22" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">−</text>
+          <path d="M 18 14 L 22 18 L 18 22" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="category-name">Ионная</span>
+      </div>
+      <div class="category-items" data-type="ionic"></div>
+    </div>
+    
+    <div class="category" data-type="cov-np">
+      <div class="category-header">
+        <svg class="category-icon" viewBox="0 0 36 36">
+          <circle cx="11" cy="18" r="8" fill="#4ecdc4" stroke="#1f6b64" stroke-width="1.5"/>
+          <circle cx="25" cy="18" r="8" fill="#4ecdc4" stroke="#1f6b64" stroke-width="1.5"/>
+          <circle cx="18" cy="18" r="2.5" fill="#fff"/>
+        </svg>
+        <span class="category-name">Ковалентная неполярная</span>
+      </div>
+      <div class="category-items" data-type="cov-np"></div>
+    </div>
+    
+    <div class="category" data-type="cov-p">
+      <div class="category-header">
+        <svg class="category-icon" viewBox="0 0 36 36">
+          <circle cx="11" cy="18" r="8" fill="#ffd93d" stroke="#8a6f10" stroke-width="1.5"/>
+          <circle cx="25" cy="18" r="8" fill="#ff6b9d" stroke="#8a2e54" stroke-width="1.5"/>
+          <circle cx="16" cy="18" r="2.5" fill="#fff"/>
+        </svg>
+        <span class="category-name">Ковалентная полярная</span>
+      </div>
+      <div class="category-items" data-type="cov-p"></div>
+    </div>
+    
+    <div class="category" data-type="metal">
+      <div class="category-header">
+        <svg class="category-icon" viewBox="0 0 36 36">
+          <rect x="6" y="10" width="24" height="16" rx="3" fill="#c0c0c0" stroke="#6b6b6b" stroke-width="1.5"/>
+          <circle cx="12" cy="18" r="2" fill="#fff"/>
+          <circle cx="18" cy="14" r="2" fill="#fff"/>
+          <circle cx="24" cy="20" r="2" fill="#fff"/>
+          <circle cx="16" cy="22" r="1.5" fill="#fff" opacity="0.7"/>
+        </svg>
+        <span class="category-name">Металлическая</span>
+      </div>
+      <div class="category-items" data-type="metal"></div>
+    </div>
+  </div>
+  
+  <div class="molecules-pool" id="moleculesPool"></div>
+  
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn btn-secondary" onclick="showLevel1Hint()">💡 Подсказка</button>
+  </div>
+</div>
+
+<!-- ===== LEVEL 2: BUILDER ===== -->
+<div class="screen" id="level2Screen">
+  <div class="game-header">
+    <div class="level-indicator">
+      <span class="level-badge">Уровень 2 / 3</span>
+      <span style="color:var(--text-dim); font-size:0.9rem;">Конструктор связи</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress2" style="width:0%"></div></div>
+    <div class="score-display">
+      <div class="score-item correct">✓ <span id="correct2">0</span></div>
+    </div>
+  </div>
+  
+  <div class="level-title">
+    <h2>Собери связь из атомов</h2>
+    <p>Выбери два атома и посмотри, какая связь между ними образуется</p>
+  </div>
+  
+  <div class="builder-layout">
+    <div class="builder-panel">
+      <h3>Выбери атомы</h3>
+      <div class="atom-selector" id="atomSelector"></div>
+      
+      <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:10px; font-size:0.85rem; color:var(--text-dim); line-height:1.5; border:1px solid rgba(255,255,255,0.08);">
+        <b style="color:var(--accent);">Электроотрицательность:</b><br>
+        Чем больше разница ЭО, тем более полярна связь. При ΔЭО > 1.7 — связь ионная.
+      </div>
+      
+      <div class="builder-controls">
+        <button class="btn" id="buildBtn" onclick="buildBond()" disabled>Собрать связь</button>
+        <button class="btn btn-secondary" onclick="resetBuilder()">Сбросить</button>
+      </div>
+    </div>
+    
+    <div class="builder-panel">
+      <h3>Результат</h3>
+      <div class="bond-stage" id="bondStage">
+        <svg viewBox="0 0 400 300" id="bondSvg">
+          <text x="200" y="150" text-anchor="middle" fill="#b8a8d8" font-size="16">Выбери два атома слева</text>
+        </svg>
+      </div>
+      <div class="bond-result" id="bondResult" style="display:none;">
+        <div class="bond-type-label" id="bondTypeLabel"></div>
+        <div class="bond-explanation" id="bondExplanation"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEVEL 3: QUIZ ===== -->
+<div class="screen" id="level3Screen">
+  <div class="game-header">
+    <div class="level-indicator">
+      <span class="level-badge">Уровень 3 / 3</span>
+      <span style="color:var(--text-dim); font-size:0.9rem;">Проверка знаний</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress3" style="width:0%"></div></div>
+    <div class="score-display">
+      <div class="score-item correct">✓ <span id="correct3">0</span></div>
+      <div class="score-item wrong">✗ <span id="wrong3">0</span></div>
+    </div>
+  </div>
+  
+  <div class="quiz-container" id="quizContainer"></div>
+</div>
+
+<!-- ===== FINAL SCREEN ===== -->
+<div class="final-screen" id="finalScreen">
+  <h1 class="title">Игра завершена!</h1>
+  <div class="final-score" id="finalScore">0%</div>
+  <p class="final-message" id="finalMessage"></p>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="statCorrect">0</div>
+      <div class="stat-label">Правильных ответов</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statWrong">0</div>
+      <div class="stat-label">Ошибок</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-label">Всего заданий</div>
+    </div>
+  </div>
+  
+  <div class="final-buttons">
+    <button class="btn" onclick="restartGame()">🔄 Играть снова</button>
+    <button class="btn btn-secondary" onclick="location.reload()">🏠 В начало</button>
+  </div>
+</div>
+
+<div class="feedback-toast" id="feedbackToast"></div>
+
+<script>
+// ============ SPARKLES GENERATION ============
+function createSparkles() {
+  const layer = document.getElementById('sparkleLayer');
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+    s.style.setProperty('--delay', (Math.random() * 5) + 's');
+    const size = 2 + Math.random() * 4;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    layer.appendChild(s);
+  }
+}
+createSparkles();
+
+// ============ DATA ============
+const molecules = [
+  { id: 'nacl', label: 'NaCl', type: 'ionic', desc: 'Na — металл, Cl — неметалл. Большая разница ЭО → ионная связь' },
+  { id: 'kbr', label: 'KBr', type: 'ionic', desc: 'K — металл, Br — неметалл. Ионная связь' },
+  { id: 'mgo', label: 'MgO', type: 'ionic', desc: 'Mg — металл, O — неметалл. Ионная связь' },
+  { id: 'h2', label: 'H₂', type: 'cov-np', desc: 'Два одинаковых атома H. Ковалентная неполярная' },
+  { id: 'o2', label: 'O₂', type: 'cov-np', desc: 'Два одинаковых атома O. Ковалентная неполярная' },
+  { id: 'n2', label: 'N₂', type: 'cov-np', desc: 'Два одинаковых атома N. Ковалентная неполярная' },
+  { id: 'hcl', label: 'HCl', type: 'cov-p', desc: 'H и Cl — разные неметаллы. Ковалентная полярная' },
+  { id: 'h2o', label: 'H₂O', type: 'cov-p', desc: 'H и O — разные неметаллы. Ковалентная полярная' },
+  { id: 'co2', label: 'CO₂', type: 'cov-p', desc: 'C и O — разные неметаллы. Связи полярные' },
+  { id: 'fe', label: 'Fe', type: 'metal', desc: 'Железо — металл. Металлическая связь' },
+  { id: 'cu', label: 'Cu', type: 'metal', desc: 'Медь — металл. Металлическая связь' },
+  { id: 'na', label: 'Na', type: 'metal', desc: 'Натрий — металл. Металлическая связь' }
+];
+
+const atoms = [
+  { symbol: 'H', name: 'Водород', en: 2.20, color: '#ffd93d', stroke: '#8a6f10', textColor: '#4a3800' },
+  { symbol: 'O', name: 'Кислород', en: 3.44, color: '#ff6b9d', stroke: '#8a2e54', textColor: '#fff' },
+  { symbol: 'N', name: 'Азот', en: 3.04, color: '#4ecdc4', stroke: '#1f6b64', textColor: '#fff' },
+  { symbol: 'Cl', name: 'Хлор', en: 3.16, color: '#a78bfa', stroke: '#5b3fb8', textColor: '#fff' },
+  { symbol: 'C', name: 'Углерод', en: 2.55, color: '#6b7280', stroke: '#374151', textColor: '#fff' },
+  { symbol: 'F', name: 'Фтор', en: 3.98, color: '#fbbf24', stroke: '#92400e', textColor: '#4a3800' },
+  { symbol: 'Na', name: 'Натрий', en: 0.93, color: '#f87171', stroke: '#991b1b', textColor: '#fff', isMetal: true },
+  { symbol: 'K', name: 'Калий', en: 0.82, color: '#fb923c', stroke: '#9a3412', textColor: '#fff', isMetal: true },
+  { symbol: 'Mg', name: 'Магний', en: 1.31, color: '#94a3b8', stroke: '#475569', textColor: '#fff', isMetal: true },
+  { symbol: 'S', name: 'Сера', en: 2.58, color: '#facc15', stroke: '#854d0e', textColor: '#4a3800' }
+];
+
+const quizQuestions = [
+  {
+    q: 'Какой тип связи образуется между атомами натрия и хлора в поваренной соли?',
+    options: ['Ковалентная полярная', 'Ионная', 'Ковалентная неполярная', 'Металлическая'],
+    correct: 1,
+    explanation: 'Na — типичный металл, Cl — типичный неметалл. Разница ЭО велика (≈2.23), поэтому электрон переходит от Na к Cl, образуя ионы Na⁺ и Cl⁻, связанные электростатически.'
+  },
+  {
+    q: 'В молекуле кислорода O₂ какая связь?',
+    options: ['Ионная', 'Ковалентная полярная', 'Ковалентная неполярная', 'Металлическая'],
+    correct: 2,
+    explanation: 'Атомы одинаковые, разница ЭО = 0. Общая электронная пара принадлежит обоим атомам в равной степени — ковалентная неполярная связь.'
+  },
+  {
+    q: 'Что характерно для металлической связи?',
+    options: [
+      'Общие электронные пары между двумя атомами',
+      'Переход электронов от металла к неметаллу',
+      'Обобществлённые электроны между множеством катионов металла',
+      'Водородные мостики между молекулами'
+    ],
+    correct: 2,
+    explanation: 'В металлах валентные электроны «обобществлены» — они свободно перемещаются между катионами, образуя «электронный газ». Это объясняет электро- и теплопроводность металлов.'
+  },
+  {
+    q: 'В каком веществе связь наиболее полярная?',
+    options: ['HCl', 'H₂', 'HF', 'H₂O'],
+    correct: 2,
+    explanation: 'Фтор — самый электроотрицательный элемент (ЭО = 3.98). Разница ЭО между H (2.20) и F (3.98) максимальна — около 1.78, поэтому связь H–F наиболее полярная.'
+  },
+  {
+    q: 'Какие признаки ионной связи?',
+    options: [
+      'Образование молекул из одинаковых атомов',
+      'Переход электронов и образование противоположно заряженных ионов',
+      'Общие электронные пары, смещённые к одному атому',
+      'Свободное движение электронов между атомами'
+    ],
+    correct: 1,
+    explanation: 'Ионная связь возникает, когда один атом почти полностью отдаёт электрон другому. Образуются ионы: катион (+) и анион (−), притягивающиеся электростатически.'
+  }
+];
+
+// ============ STATE ============
+let state = {
+  correct1: 0, wrong1: 0,
+  correct2: 0,
+  correct3: 0, wrong3: 0,
+  currentQ: 0,
+  selectedAtoms: [],
+  builderPairs: new Set()
+};
+
+// ============ SVG GENERATORS ============
+function createAtomSVG(atom, size = 50) {
+  const r = size / 2;
+  const gradId = 'grad_' + atom.symbol + '_' + Math.random().toString(36).substr(2,5);
+  return `
+    <svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="${gradId}" cx="35%" cy="35%">
+          <stop offset="0%" stop-color="${lighten(atom.color, 30)}"/>
+          <stop offset="70%" stop-color="${atom.color}"/>
+          <stop offset="100%" stop-color="${darken(atom.color, 30)}"/>
+        </radialGradient>
+      </defs>
+      <circle cx="${r}" cy="${r}" r="${r-2}" fill="url(#${gradId})" stroke="${atom.stroke}" stroke-width="1.5"/>
+      <circle cx="${r*0.7}" cy="${r*0.7}" r="${r*0.25}" fill="#fff" opacity="0.4"/>
+      <text x="${r}" y="${r + size*0.12}" text-anchor="middle" font-size="${size*0.38}" font-weight="800" fill="${atom.textColor}" font-family="Segoe UI">${atom.symbol}</text>
+    </svg>
+  `;
+}
+
+function createMoleculeSVG(mol) {
+  const id = 'mol_' + mol.id;
+  switch(mol.id) {
+    case 'nacl': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_na" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fca5a5"/><stop offset="100%" stop-color="#dc2626"/>
+          </radialGradient>
+          <radialGradient id="${id}_cl" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#7c3aed"/>
+          </radialGradient>
+        </defs>
+        <circle cx="28" cy="40" r="18" fill="url(#${id}_na)" stroke="#7f1d1d" stroke-width="1.5"/>
+        <text x="28" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Na⁺</text>
+        <circle cx="55" cy="40" r="22" fill="url(#${id}_cl)" stroke="#4c1d95" stroke-width="1.5"/>
+        <text x="55" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Cl⁻</text>
+        <path d="M 42 35 L 38 40 L 42 45" stroke="#ffd93d" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>`;
+    case 'kbr': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_k" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fdba74"/><stop offset="100%" stop-color="#ea580c"/>
+          </radialGradient>
+          <radialGradient id="${id}_br" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#d8b4fe"/><stop offset="100%" stop-color="#9333ea"/>
+          </radialGradient>
+        </defs>
+        <circle cx="28" cy="40" r="18" fill="url(#${id}_k)" stroke="#7c2d12" stroke-width="1.5"/>
+        <text x="28" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">K⁺</text>
+        <circle cx="55" cy="40" r="22" fill="url(#${id}_br)" stroke="#581c87" stroke-width="1.5"/>
+        <text x="55" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Br⁻</text>
+        <path d="M 42 35 L 38 40 L 42 45" stroke="#ffd93d" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>`;
+    case 'mgo': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_mg" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#64748b"/>
+          </radialGradient>
+          <radialGradient id="${id}_o" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#e11d48"/>
+          </radialGradient>
+        </defs>
+        <circle cx="28" cy="40" r="17" fill="url(#${id}_mg)" stroke="#334155" stroke-width="1.5"/>
+        <text x="28" y="45" text-anchor="middle" font-size="12" font-weight="800" fill="#1e293b">Mg²⁺</text>
+        <circle cx="55" cy="40" r="21" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="55" y="45" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">O²⁻</text>
+      </svg>`;
+    case 'h2': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_h" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fef08a"/><stop offset="100%" stop-color="#eab308"/>
+          </radialGradient>
+        </defs>
+        <circle cx="28" cy="40" r="16" fill="url(#${id}_h)" stroke="#854d0e" stroke-width="1.5"/>
+        <text x="28" y="45" text-anchor="middle" font-size="14" font-weight="800" fill="#422006">H</text>
+        <circle cx="52" cy="40" r="16" fill="url(#${id}_h)" stroke="#854d0e" stroke-width="1.5"/>
+        <text x="52" y="45" text-anchor="middle" font-size="14" font-weight="800" fill="#422006">H</text>
+        <line x1="38" y1="40" x2="42" y2="40" stroke="#4ecdc4" stroke-width="2.5"/>
+        <circle cx="40" cy="40" r="2.5" fill="#fff"/>
+      </svg>`;
+    case 'o2': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_o" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#e11d48"/>
+          </radialGradient>
+        </defs>
+        <circle cx="26" cy="40" r="18" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="26" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">O</text>
+        <circle cx="54" cy="40" r="18" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="54" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">O</text>
+        <line x1="38" y1="37" x2="42" y2="37" stroke="#4ecdc4" stroke-width="2"/>
+        <line x1="38" y1="43" x2="42" y2="43" stroke="#4ecdc4" stroke-width="2"/>
+      </svg>`;
+    case 'n2': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_n" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#7ee8dc"/><stop offset="100%" stop-color="#14b8a6"/>
+          </radialGradient>
+        </defs>
+        <circle cx="26" cy="40" r="18" fill="url(#${id}_n)" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="26" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">N</text>
+        <circle cx="54" cy="40" r="18" fill="url(#${id}_n)" stroke="#0f766e" stroke-width="1.5"/>
+        <text x="54" y="45" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">N</text>
+        <line x1="37" y1="35" x2="43" y2="35" stroke="#4ecdc4" stroke-width="1.8"/>
+        <line x1="37" y1="40" x2="43" y2="40" stroke="#4ecdc4" stroke-width="1.8"/>
+        <line x1="37" y1="45" x2="43" y2="45" stroke="#4ecdc4" stroke-width="1.8"/>
+      </svg>`;
+    case 'hcl': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_h" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fef08a"/><stop offset="100%" stop-color="#eab308"/>
+          </radialGradient>
+          <radialGradient id="${id}_cl" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#7c3aed"/>
+          </radialGradient>
+        </defs>
+        <circle cx="26" cy="40" r="14" fill="url(#${id}_h)" stroke="#854d0e" stroke-width="1.5"/>
+        <text x="26" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#422006">H</text>
+        <circle cx="54" cy="40" r="20" fill="url(#${id}_cl)" stroke="#4c1d95" stroke-width="1.5"/>
+        <text x="54" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Cl</text>
+        <line x1="36" y1="40" x2="40" y2="40" stroke="#ffd93d" stroke-width="2.5"/>
+        <circle cx="39" cy="40" r="2.5" fill="#fff"/>
+        <path d="M 43 35 L 47 40 L 43 45" stroke="#ffd93d" stroke-width="1" fill="none" opacity="0.7"/>
+      </svg>`;
+    case 'h2o': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_o" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#e11d48"/>
+          </radialGradient>
+          <radialGradient id="${id}_h" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fef08a"/><stop offset="100%" stop-color="#eab308"/>
+          </radialGradient>
+        </defs>
+        <circle cx="40" cy="35" r="18" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="40" y="40" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">O</text>
+        <circle cx="20" cy="58" r="12" fill="url(#${id}_h)" stroke="#854d0e" stroke-width="1.5"/>
+        <text x="20" y="62" text-anchor="middle" font-size="11" font-weight="800" fill="#422006">H</text>
+        <circle cx="60" cy="58" r="12" fill="url(#${id}_h)" stroke="#854d0e" stroke-width="1.5"/>
+        <text x="60" y="62" text-anchor="middle" font-size="11" font-weight="800" fill="#422006">H</text>
+        <line x1="30" y1="45" x2="25" y2="52" stroke="#ffd93d" stroke-width="2"/>
+        <line x1="50" y1="45" x2="55" y2="52" stroke="#ffd93d" stroke-width="2"/>
+      </svg>`;
+    case 'co2': return `
+      <svg class="molecule-svg" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="${id}_c" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#9ca3af"/><stop offset="100%" stop-color="#4b5563"/>
+          </radialGradient>
+          <radialGradient id="${id}_o" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#fda4af"/><stop offset="100%" stop-color="#e11d48"/>
+          </radialGradient>
+        </defs>
+        <circle cx="40" cy="40" r="16" fill="url(#${id}_c)" stroke="#1f2937" stroke-width="1.5"/>
+        <text x="40" y="45" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">C</text>
+        <circle cx="14" cy="40" r="14" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="14" y="44" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">O</text>
+        <circle cx="66" cy="40" r="14" fill="url(#${id}_o)" stroke="#881337" stroke-width="1.5"/>
+        <text x="66" y="44" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">O</text>
+        <line x1="24" y1="37" x2="29" y2="37" stroke="#ffd93d" stroke-width="1.8"/>
+        <line x1="24" y1="43" x2="29" y2="43" stroke="#ffd93d" stroke-width="1.8"/>
+        <line x1="51" y1="37" x2="56" y2="37" stroke="#ffd93d" stroke-width="1.8"/>
+        <line x1="51" y1="43" x2="56" y2="43" stroke="#ffd93d" stroke-width="1.8"/>
+      </svg>`;
+    case 'fe': case 'cu': case 'na':
+      const metalColors = {
+        fe: { c1: '#cbd5e1', c2: '#64748b', s: '#334155', sym: 'Fe' },
+        cu: { c1: '#fdba74', c2: '#c2410c', s: '#7c2d12', sym: 'Cu' },
+        na: { c1: '#fca5a5', c2: '#dc2626', s: '#7f1d1d', sym: 'Na' }
+      };
+      const mc = metalColors[mol.id];
+      return `
+        <svg class="molecule-svg" viewBox="0 0 80 80">
+          <defs>
+            <radialGradient id="${id}_m" cx="35%" cy="35%">
+              <stop offset="0%" stop-color="${mc.c1}"/><stop offset="100%" stop-color="${mc.c2}"/>
+            </radialGradient>
+          </defs>
+          <rect x="10" y="20" width="60" height="40" rx="6" fill="url(#${id}_m)" stroke="${mc.s}" stroke-width="1.5"/>
+          <rect x="14" y="24" width="15" height="8" rx="2" fill="#fff" opacity="0.3"/>
+          <text x="40" y="46" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">${mc.sym}</text>
+          <circle cx="18" cy="52" r="1.5" fill="#fff" opacity="0.8"/>
+          <circle cx="30" cy="28" r="1.5" fill="#fff" opacity="0.8"/>
+          <circle cx="55" cy="50" r="1.5" fill="#fff" opacity="0.8"/>
+          <circle cx="62" cy="32" r="1.5" fill="#fff" opacity="0.8"/>
+        </svg>`;
+    default:
+      return `<svg class="molecule-svg" viewBox="0 0 80 80"><text x="40" y="45" text-anchor="middle" fill="#fff">${mol.label}</text></svg>`;
+  }
+}
+
+function lighten(hex, percent) {
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.min(255, (num >> 16) + percent);
+  const g = Math.min(255, ((num >> 8) & 0x00FF) + percent);
+  const b = Math.min(255, (num & 0x0000FF) + percent);
+  return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+}
+function darken(hex, percent) {
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.max(0, (num >> 16) - percent);
+  const g = Math.max(0, ((num >> 8) & 0x00FF) - percent);
+  const b = Math.max(0, (num & 0x0000FF) - percent);
+  return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+}
+
+// ============ GAME FLOW ============
+function startGame() {
+  document.getElementById('startScreen').classList.remove('active');
+  document.getElementById('level1Screen').classList.add('active');
+  initLevel1();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen, .start-screen, .final-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ============ LEVEL 1 ============
+function initLevel1() {
+  const pool = document.getElementById('moleculesPool');
+  pool.innerHTML = '';
+  const shuffled = [...molecules].sort(() => Math.random() - 0.5);
+  shuffled.forEach(mol => {
+    const card = document.createElement('div');
+    card.className = 'molecule-card';
+    card.draggable = true;
+    card.dataset.id = mol.id;
+    card.dataset.type = mol.type;
+    card.innerHTML = createMoleculeSVG(mol) + `<div class="molecule-label">${mol.label}</div>`;
+    card.title = mol.desc;
+    
+    card.addEventListener('dragstart', e => {
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', mol.id);
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    
+    // Touch support
+    let touchClone = null;
+    card.addEventListener('touchstart', e => {
+      const touch = e.touches[0];
+      touchClone = card.cloneNode(true);
+      touchClone.style.position = 'fixed';
+      touchClone.style.pointerEvents = 'none';
+      touchClone.style.opacity = '0.8';
+      touchClone.style.zIndex = '999';
+      touchClone.style.width = card.offsetWidth + 'px';
+      document.body.appendChild(touchClone);
+      card.classList.add('dragging');
+      card.dataset.touching = 'true';
+    });
+    card.addEventListener('touchmove', e => {
+      if (!touchClone) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchClone.style.left = (touch.clientX - 40) + 'px';
+      touchClone.style.top = (touch.clientY - 40) + 'px';
+      
+      document.querySelectorAll('.category').forEach(c => c.classList.remove('drag-over'));
+      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+      const cat = elem?.closest('.category');
+      if (cat) cat.classList.add('drag-over');
+    }, { passive: false });
+    card.addEventListener('touchend', e => {
+      if (!touchClone) return;
+      const touch = e.changedTouches[0];
+      if (touchClone.parentNode) touchClone.parentNode.removeChild(touchClone);
+      touchClone = null;
+      card.classList.remove('dragging');
+      
+      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+      const cat = elem?.closest('.category');
+      document.querySelectorAll('.category').forEach(c => c.classList.remove('drag-over'));
+      if (cat) {
+        handleDrop(cat.dataset.type, mol, card);
+      }
+    });
+    
+    pool.appendChild(card);
+  });
+  
+  document.querySelectorAll('.category').forEach(cat => {
+    cat.addEventListener('dragover', e => {
+      e.preventDefault();
+      cat.classList.add('drag-over');
+    });
+    cat.addEventListener('dragleave', () => cat.classList.remove('drag-over'));
+    cat.addEventListener('drop', e => {
+      e.preventDefault();
+      cat.classList.remove('drag-over');
+      const molId = e.dataTransfer.getData('text/plain');
+      const mol = molecules.find(m => m.id === molId);
+      const card = document.querySelector(`.molecule-card[data-id="${molId}"]`);
+      if (mol && card) handleDrop(cat.dataset.type, mol, card);
+    });
+  });
+}
+
+function handleDrop(categoryType, mol, card) {
+  if (card.classList.contains('correct')) return;
+  
+  const category = document.querySelector(`.category[data-type="${categoryType}"]`);
+  const itemsContainer = category.querySelector('.category-items');
+  
+  if (mol.type === categoryType) {
+    card.classList.add('correct');
+    card.draggable = false;
+    itemsContainer.appendChild(card);
+    state.correct1++;
+    document.getElementById('correct1').textContent = state.correct1;
+    showToast('✓ Верно! ' + mol.desc, 'success');
+    updateProgress1();
+    
+    if (state.correct1 === molecules.length) {
+      setTimeout(() => {
+        showScreen('level2Screen');
+        initLevel2();
+      }, 1500);
+    }
+  } else {
+    card.classList.add('wrong');
+    state.wrong1++;
+    document.getElementById('wrong1').textContent = state.wrong1;
+    showToast('✗ Неверно. Подумай ещё раз!', 'error');
+    setTimeout(() => card.classList.remove('wrong'), 600);
+  }
+}
+
+function updateProgress1() {
+  const pct = (state.correct1 / molecules.length) * 100;
+  document.getElementById('progress1').style.width = pct + '%';
+}
+
+function showLevel1Hint() {
+  showToast('💡 Подсказка: металл + неметалл → ионная; одинаковые неметаллы → ковалентная неполярная; разные неметаллы → ковалентная полярная; чистые металлы → металлическая', 'success', 6000);
+}
+
+// ============ LEVEL 2 ============
+function initLevel2() {
+  const selector = document.getElementById('atomSelector');
+  selector.innerHTML = '';
+  atoms.forEach(atom => {
+    const btn = document.createElement('div');
+    btn.className = 'atom-btn';
+    btn.dataset.symbol = atom.symbol;
+    btn.innerHTML = createAtomSVG(atom, 50) + `<div class="symbol">${atom.symbol}</div><div class="name">${atom.name}</div>`;
+    btn.addEventListener('click', () => selectAtom(atom, btn));
+    selector.appendChild(btn);
+  });
+}
+
+function selectAtom(atom, btn) {
+  if (state.selectedAtoms.length >= 2) return;
+  if (state.selectedAtoms.find(a => a.symbol === atom.symbol)) {
+    // deselect
+    state.selectedAtoms = state.selectedAtoms.filter(a => a.symbol !== atom.symbol);
+    btn.classList.remove('selected');
+  } else {
+    state.selectedAtoms.push(atom);
+    btn.classList.add('selected');
+  }
+  document.getElementById('buildBtn').disabled = state.selectedAtoms.length !== 2;
+}
+
+function resetBuilder() {
+  state.selectedAtoms = [];
+  document.querySelectorAll('.atom-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('buildBtn').disabled = true;
+  document.getElementById('bondResult').style.display = 'none';
+  document.getElementById('bondSvg').innerHTML = '<text x="200" y="150" text-anchor="middle" fill="#b8a8d8" font-size="16">Выбери два атома слева</text>';
+}
+
+function buildBond() {
+  if (state.selectedAtoms.length !== 2) return;
+  const [a1, a2] = state.selectedAtoms;
+  const delta = Math.abs(a1.en - a2.en);
+  const pairKey = [a1.symbol, a2.symbol].sort().join('-');
+  
+  let bondType, bondColor, bondLabel, explanation;
+  
+  if (a1.isMetal && a2.isMetal) {
+    bondType = 'metal';
+    bondColor = '#c0c0c0';
+    bondLabel = 'Металлическая связь';
+    explanation = `Оба элемента — металлы. Валентные электроны обобществлены и свободно перемещаются между катионами, образуя «электронный газ». Это объясняет электропроводность, ковкость и блеск металлов.`;
+  } else if ((a1.isMetal && !a2.isMetal) || (!a1.isMetal && a2.isMetal)) {
+    bondType = 'ionic';
+    bondColor = '#ff6b9d';
+    bondLabel = 'Ионная связь';
+    const metal = a1.isMetal ? a1 : a2;
+    const nonmetal = a1.isMetal ? a2 : a1;
+    explanation = `${metal.symbol} — металл, ${nonmetal.symbol} — неметалл. Разница ЭО = ${delta.toFixed(2)} (>1.7). Металл отдаёт электрон, образуя катион, неметалл принимает — образуется анион. Ионы удерживаются электростатическим притяжением.`;
+  } else if (delta < 0.4) {
+    bondType = 'cov-np';
+    bondColor = '#4ecdc4';
+    bondLabel = 'Ковалентная неполярная связь';
+    explanation = `Оба атома — неметаллы с близкой электроотрицательностью (ΔЭО = ${delta.toFixed(2)}). Общая электронная пара принадлежит обоим атомам в равной степени.`;
+  } else {
+    bondType = 'cov-p';
+    bondColor = '#ffd93d';
+    bondLabel = 'Ковалентная полярная связь';
+    const moreEN = a1.en > a2.en ? a1 : a2;
+    const lessEN = a1.en > a2.en ? a2 : a1;
+    explanation = `Оба атома — неметаллы, но с разной ЭО (ΔЭО = ${delta.toFixed(2)}). Общая электронная пара смещена к более электроотрицательному атому ${moreEN.symbol}. На нём возникает частичный отрицательный заряд (δ−), на ${lessEN.symbol} — частичный положительный (δ+).`;
+  }
+  
+  drawBond(a1, a2, bondType, bondColor);
+  
+  const result = document.getElementById('bondResult');
+  result.style.display = 'block';
+  document.getElementById('bondTypeLabel').textContent = bondLabel;
+  document.getElementById('bondTypeLabel').style.color = bondColor;
+  document.getElementById('bondExplanation').textContent = explanation;
+  
+  if (!state.builderPairs.has(pairKey)) {
+    state.builderPairs.add(pairKey);
+    state.correct2++;
+    document.getElementById('correct2').textContent = state.correct2;
+    updateProgress2();
+    
+    if (state.builderPairs.size >= 4) {
+      setTimeout(() => {
+        showScreen('level3Screen');
+        initLevel3();
+      }, 2500);
+    }
+  }
+}
+
+function updateProgress2() {
+  const pct = Math.min(100, (state.builderPairs.size / 4) * 100);
+  document.getElementById('progress2').style.width = pct + '%';
+}
+
+function drawBond(a1, a2, bondType, bondColor) {
+  const svg = document.getElementById('bondSvg');
+  const g1 = 'bg_' + a1.symbol + Math.random().toString(36).substr(2,5);
+  const g2 = 'bg_' + a2.symbol + Math.random().toString(36).substr(2,5);
+  
+  let bondVisual = '';
+  
+  if (bondType === 'ionic') {
+    bondVisual = `
+      <g>
+        <path d="M 160 150 Q 200 110 240 150" stroke="${bondColor}" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity="0.7"/>
+        <circle cx="200" cy="130" r="5" fill="#fff">
+          <animateMotion dur="2s" repeatCount="indefinite" path="M -40 20 Q 0 -20 40 20" />
+        </circle>
+        <text x="200" y="100" text-anchor="middle" fill="${bondColor}" font-size="14" font-weight="700">e⁻</text>
+        <text x="160" y="200" text-anchor="middle" fill="#fff" font-size="13">→ катион +</text>
+        <text x="240" y="200" text-anchor="middle" fill="#fff" font-size="13">← анион −</text>
+      </g>
+    `;
+  } else if (bondType === 'cov-np') {
+    bondVisual = `
+      <g>
+        <line x1="175" y1="150" x2="225" y2="150" stroke="${bondColor}" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="200" cy="150" r="6" fill="#fff">
+          <animate attributeName="cx" values="185;215;185" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="200" y="125" text-anchor="middle" fill="${bondColor}" font-size="12" font-weight="600">общая пара</text>
+        <text x="200" y="200" text-anchor="middle" fill="#b8a8d8" font-size="12">электроны делятся поровну</text>
+      </g>
+    `;
+  } else if (bondType === 'cov-p') {
+    const moreEN = a1.en > a2.en ? a1 : a2;
+    const moreX = moreEN.symbol === a1.symbol ? 160 : 240;
+    bondVisual = `
+      <g>
+        <line x1="175" y1="150" x2="225" y2="150" stroke="${bondColor}" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="200" cy="150" r="6" fill="#fff">
+          <animate attributeName="cx" values="185;${moreX - 15};185" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="200" y="125" text-anchor="middle" fill="${bondColor}" font-size="12" font-weight="600">смещена к ${moreEN.symbol}</text>
+        <text x="${moreX}" y="200" text-anchor="middle" fill="${bondColor}" font-size="13" font-weight="700">δ−</text>
+        <text x="${moreX === 160 ? 240 : 160}" y="200" text-anchor="middle" fill="#b8a8d8" font-size="13">δ+</text>
+      </g>
+    `;
+  } else if (bondType === 'metal') {
+    bondVisual = `
+      <g>
+        <rect x="140" y="120" width="120" height="60" rx="8" fill="${bondColor}" opacity="0.3" stroke="${bondColor}" stroke-width="1.5"/>
+        <circle cx="160" cy="140" r="3" fill="#fff"><animate attributeName="cx" values="160;240;160" dur="3s" repeatCount="indefinite"/></circle>
+        <circle cx="200" cy="160" r="3" fill="#fff"><animate attributeName="cx" values="200;160;200" dur="2.5s" repeatCount="indefinite"/></circle>
+        <circle cx="230" cy="145" r="3" fill="#fff"><animate attributeName="cy" values="145;165;145" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="180" cy="155" r="3" fill="#fff"><animate attributeName="cy" values="155;135;155" dur="2.8s" repeatCount="indefinite"/></circle>
+        <text x="200" y="210" text-anchor="middle" fill="${bondColor}" font-size="12" font-weight="600">«электронный газ»</text>
+      </g>
+    `;
+  }
+  
+  svg.innerHTML = `
+    <defs>
+      <radialGradient id="${g1}" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="${lighten(a1.color, 30)}"/>
+        <stop offset="70%" stop-color="${a1.color}"/>
+        <stop offset="100%" stop-color="${darken(a1.color, 30)}"/>
+      </radialGradient>
+      <radialGradient id="${g2}" cx="35%" cy="35%">
+        <stop offset="0%" stop-color="${lighten(a2.color, 30)}"/>
+        <stop offset="70%" stop-color="${a2.color}"/>
+        <stop offset="100%" stop-color="${darken(a2.color, 30)}"/>
+      </radialGradient>
+    </defs>
+    
+    <g>
+      <circle cx="160" cy="150" r="50" fill="url(#${g1})" stroke="${a1.stroke}" stroke-width="2"/>
+      <circle cx="145" cy="135" r="14" fill="#fff" opacity="0.3"/>
+      <text x="160" y="158" text-anchor="middle" font-size="28" font-weight="800" fill="${a1.textColor}" font-family="Segoe UI">${a1.symbol}</text>
+      <text x="160" y="220" text-anchor="middle" fill="#b8a8d8" font-size="12">ЭО = ${a1.en.toFixed(2)}</text>
+    </g>
+    
+    <g>
+      <circle cx="240" cy="150" r="50" fill="url(#${g2})" stroke="${a2.stroke}" stroke-width="2"/>
+      <circle cx="225" cy="135" r="14" fill="#fff" opacity="0.3"/>
+      <text x="240" y="158" text-anchor="middle" font-size="28" font-weight="800" fill="${a2.textColor}" font-family="Segoe UI">${a2.symbol}</text>
+      <text x="240" y="220" text-anchor="middle" fill="#b8a8d8" font-size="12">ЭО = ${a2.en.toFixed(2)}</text>
+    </g>
+    
+    ${bondVisual}
+    
+    <text x="200" y="270" text-anchor="middle" fill="${bondColor}" font-size="14" font-weight="700">ΔЭО = ${Math.abs(a1.en - a2.en).toFixed(2)}</text>
+  `;
+}
+
+// ============ LEVEL 3 ============
+function initLevel3() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (state.currentQ >= quizQuestions.length) {
+    showFinal();
+    return;
+  }
+  
+  const q = quizQuestions[state.currentQ];
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = `
+    <div class="quiz-question">
+      <h3>Вопрос ${state.currentQ + 1} из ${quizQuestions.length}</h3>
+      <p style="font-size:1.1rem; line-height:1.6;">${q.q}</p>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-explanation" id="quizExplanation">${q.explanation}</div>
+    </div>
+    <div style="text-align:center;">
+      <button class="btn" id="nextQBtn" onclick="nextQuestion()" style="display:none;">Далее →</button>
+    </div>
+  `;
+  
+  const optionsDiv = document.getElementById('quizOptions');
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => selectAnswer(i, btn));
+    optionsDiv.appendChild(btn);
+  });
+  
+  document.getElementById('progress3').style.width = ((state.currentQ) / quizQuestions.length * 100) + '%';
+}
+
+function selectAnswer(idx, btn) {
+  const q = quizQuestions[state.currentQ];
+  const options = document.querySelectorAll('.quiz-option');
+  options.forEach(o => o.classList.add('disabled'));
+  
+  if (idx === q.correct) {
+    btn.classList.add('correct');
+    state.correct3++;
+    document.getElementById('correct3').textContent = state.correct3;
+    showToast('✓ Верно!', 'success');
+  } else {
+    btn.classList.add('wrong');
+    options[q.correct].classList.add('correct');
+    state.wrong3++;
+    document.getElementById('wrong3').textContent = state.wrong3;
+    showToast('✗ Неверно. Правильный ответ выделен.', 'error');
+  }
+  
+  document.getElementById('quizExplanation').classList.add('show');
+  document.getElementById('nextQBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  state.currentQ++;
+  renderQuestion();
+}
+
+// ============ FINAL ============
+function showFinal() {
+  showScreen('finalScreen');
+  const total = state.correct1 + state.correct2 + state.correct3;
+  const totalQ = molecules.length + 4 + quizQuestions.length;
+  const wrong = state.wrong1 + state.wrong3;
+  const pct = Math.round((total / (total + wrong)) * 100);
+  
+  document.getElementById('finalScore').textContent = pct + '%';
+  document.getElementById('statCorrect').textContent = total;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statTotal').textContent = total + wrong;
+  
+  let message = '';
+  if (pct >= 90) message = '🏆 Превосходно! Ты отлично разбираешься в типах химических связей.';
+  else if (pct >= 70) message = '👍 Хороший результат! Ещё немного практики — и будет идеально.';
+  else if (pct >= 50) message = '📚 Неплохо, но стоит повторить тему. Попробуй ещё раз!';
+  else message = '💪 Не расстраивайся! Химия — сложная наука. Попробуй снова — получится лучше.';
+  
+  document.getElementById('finalMessage').textContent = message;
+}
+
+function restartGame() {
+  state = {
+    correct1: 0, wrong1: 0,
+    correct2: 0,
+    correct3: 0, wrong3: 0,
+    currentQ: 0,
+    selectedAtoms: [],
+    builderPairs: new Set()
+  };
+  ['correct1','wrong1','correct2','correct3','wrong3'].forEach(id => {
+    document.getElementById(id).textContent = '0';
+  });
+  document.getElementById('progress1').style.width = '0%';
+  document.getElementById('progress2').style.width = '0%';
+  document.getElementById('progress3').style.width = '0%';
+  resetBuilder();
+  showScreen('level1Screen');
+  initLevel1();
+}
+
+// ============ UTILS ============
+function showToast(msg, type = 'success', duration = 3000) {
+  const toast = document.getElementById('feedbackToast');
+  toast.textContent = msg;
+  toast.className = 'feedback-toast show ' + type;
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+</script>
+
+</body>
+</html>
